@@ -72,6 +72,31 @@
             box-shadow: inset 0 0 12px rgba(192, 133, 145, 0.16), 0 0 14px rgba(192, 133, 145, 0.12);
         }
 
+        .hud {
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 2.4vw, 28px);
+        }
+
+        .operator-name,
+        .settings-link {
+            color: rgba(207, 219, 226, 0.76);
+            font: 500 9px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            letter-spacing: 0.12em;
+            text-decoration: none;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .settings-link { color: rgba(221, 164, 173, 0.92); }
+
+        .settings-link:hover,
+        .settings-link:focus-visible {
+            color: #fff;
+            outline: none;
+            text-shadow: 0 0 12px rgba(221, 164, 173, 0.7);
+        }
+
         .logout-form {
             margin: 0;
         }
@@ -106,6 +131,17 @@
             height: 13px;
         }
 
+        @media (max-width: 680px) {
+            .top-nav { padding: 12px 16px; }
+            .brand { gap: 7px; font-size: 8px; letter-spacing: 0.1em; }
+            .brand-mark { width: 24px; height: 24px; }
+            .hud { display: grid; grid-template-columns: auto auto; justify-items: end; gap: 8px 12px; }
+            .operator-name { grid-column: 1; grid-row: 1; font-size: 8px; }
+            .settings-link { grid-column: 2; grid-row: 1; font-size: 8px; }
+            .logout-form { grid-column: 2; grid-row: 2; }
+            .logout-button { min-height: 30px; padding: 0 9px; font-size: 8px; }
+        }
+
         .visually-hidden {
             position: absolute;
             width: 1px;
@@ -126,15 +162,19 @@
         <span class="brand-mark" aria-hidden="true">H</span>
         <span>The Hive Project</span>
     </a>
-    <form class="logout-form" method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button class="logout-button" type="submit">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10M14 8l4 4-4 4m4-4H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" />
-            </svg>
-            <span>Logout</span>
-        </button>
-    </form>
+    <div class="hud">
+        <span class="operator-name">{{ auth()->user()->name }}</span>
+        <a class="settings-link" href="{{ route('settings.index') }}">Security // Settings</a>
+        <form class="logout-form" method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button class="logout-button" type="submit">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10M14 8l4 4-4 4m4-4H9" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" />
+                </svg>
+                <span>Disconnect</span>
+            </button>
+        </form>
+    </div>
 </header>
 <nav class="visually-hidden" aria-label="Hive applications">
     @foreach ($applications as $application)

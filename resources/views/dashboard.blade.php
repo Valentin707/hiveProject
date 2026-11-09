@@ -17,6 +17,7 @@
     <div class="hud">
         <span class="operator-name">{{ auth()->user()->name }}</span>
         <a class="settings-link" href="{{ route('settings.index') }}">Security // Settings</a>
+        <a class="registry-link" href="{{ route('applications.index') }}">Nodes // Registry</a>
         <form class="logout-form" method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="logout-button" type="submit">
@@ -30,7 +31,7 @@
 </header>
 <nav class="visually-hidden" aria-label="Hive applications">
     @foreach ($applications as $application)
-        <a href="{{ $application['targetUrl'] }}">{{ $application['name'] }}</a>
+        <a href="{{ $application['targetUrl'] }}" title="{{ $application['description'] ?? '' }}">{{ $application['name'] }}</a>
     @endforeach
 </nav>
 

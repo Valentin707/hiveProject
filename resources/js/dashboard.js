@@ -449,6 +449,18 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
                 ctx.shadowColor = hovered ? 'rgba(159, 218, 246, 0.85)' : 'rgba(96, 148, 174, 0.42)';
                 ctx.shadowBlur = hovered ? 12 : 5;
                 ctx.fillText(node.name, node.labelX, node.y);
+
+                if (hovered && node.description) {
+                    const subtitle = node.description.length > 42
+                        ? `${node.description.slice(0, 39)}…`
+                        : node.description;
+
+                    ctx.font = `400 ${Math.max(9, node.fontSize * 0.66)}px "SFMono-Regular", Consolas, "Liberation Mono", monospace`;
+                    ctx.fillStyle = 'rgba(194, 211, 221, 0.78)';
+                    ctx.shadowBlur = 0;
+                    ctx.fillText(subtitle, node.labelX, node.y + node.fontSize * 0.92, 220);
+                }
+
                 ctx.restore();
             }
         }

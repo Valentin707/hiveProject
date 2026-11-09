@@ -89,6 +89,18 @@
             text-shadow: 0 0 12px rgba(221, 164, 173, 0.7);
         }
 
+        .registry-link {
+            color: rgba(169, 196, 210, 0.86);
+            font: 500 9px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            letter-spacing: 0.12em;
+            text-decoration: none;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .registry-link:hover,
+        .registry-link:focus-visible { color: #fff; outline: none; text-shadow: 0 0 12px rgba(169, 196, 210, 0.7); }
+
         .logout-form {
             margin: 0;
         }
@@ -130,6 +142,7 @@
             .hud { display: grid; grid-template-columns: auto auto; justify-items: end; gap: 8px 12px; }
             .operator-name { grid-column: 1; grid-row: 1; font-size: 8px; }
             .settings-link { grid-column: 2; grid-row: 1; font-size: 8px; }
+            .registry-link { grid-column: 1; grid-row: 2; justify-self: end; font-size: 8px; }
             .logout-form { grid-column: 2; grid-row: 2; }
             .logout-button { min-height: 30px; padding: 0 9px; font-size: 8px; }
         }

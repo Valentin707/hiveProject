@@ -223,7 +223,7 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
             this.logo = new Image();
             this.logoLoaded = false;
             this.logo.addEventListener('load', () => { this.logoLoaded = true; }, { once: true });
-            this.logo.src = './THP.png';
+        this.logo.src = this.canvas.dataset.logoUrl;
             this.pointer = { x: -10000, y: -10000, inside: false };
             this.shards = Array.from({ length: SHARD_COUNT }, (_, index) => new GlassShard(index));
             this.projectNodes = [];

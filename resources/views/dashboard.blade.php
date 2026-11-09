@@ -8,7 +8,7 @@
     @vite('resources/js/dashboard.js')
 </head>
 <body>
-<canvas id="dashboard-canvas" data-applications="{{ json_encode($applications) }}" aria-label="The Hive Project logo over an animated octagonal glass shard background"></canvas>
+<canvas id="dashboard-canvas" data-applications="{{ json_encode($applications) }}" data-logo-url="{{ asset('images/THP.png') }}" aria-label="The Hive Project logo over an animated octagonal glass shard background"></canvas>
 <header class="top-nav">
     <a class="brand" href="{{ route('dashboard') }}" aria-label="The Hive Project dashboard">
         <span class="brand-mark" aria-hidden="true">H</span>

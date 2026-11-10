@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/js/dashboard.js',
                 'resources/js/login.js',
                 'resources/css/settings.css',
+                'resources/css/errors.css',
                 'resources/js/applications.js',
             ],
             refresh: true,

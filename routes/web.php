@@ -4,6 +4,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function (): void {
@@ -20,9 +21,16 @@ Route::middleware(['auth', 'auth.session'])->group(function (): void {
     Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
     Route::delete('/settings/tokens/{tokenId}', [SettingsController::class, 'revokeToken'])->name('settings.tokens.revoke');
 
-    Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
-    Route::post('/applications', [ApplicationController::class, 'store'])->name('applications.store');
-    Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
-    Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
-    Route::patch('/applications/{application}/toggle', [ApplicationController::class, 'toggle'])->name('applications.toggle');
+    Route::middleware('can:admin')->group(function (): void {
+        Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+        Route::post('/applications', [ApplicationController::class, 'store'])->name('applications.store');
+        Route::put('/applications/{application}', [ApplicationController::class, 'update'])->name('applications.update');
+        Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
+        Route::patch('/applications/{application}/toggle', [ApplicationController::class, 'toggle'])->name('applications.toggle');
+
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.role.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
 });

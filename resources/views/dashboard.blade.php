@@ -17,7 +17,10 @@
     <div class="hud">
         <span class="operator-name">{{ auth()->user()->name }}</span>
         <a class="settings-link" href="{{ route('settings.index') }}">Security // Settings</a>
-        <a class="registry-link" href="{{ route('applications.index') }}">Nodes // Registry</a>
+        @can('admin')
+            <a class="registry-link" href="{{ route('applications.index') }}">Nodes // Registry</a>
+            <a class="management-link" href="{{ route('users.index') }}">User // Management</a>
+        @endcan
         <form class="logout-form" method="POST" action="{{ route('logout') }}">
             @csrf
             <button class="logout-button" type="submit">

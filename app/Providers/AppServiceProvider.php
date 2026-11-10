@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Passport\Client;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -22,5 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Passport::useClientModel(Client::class);
+
+        Gate::define('admin', fn (User $user): bool => $user->role === User::ROLE_ADMIN);
     }
 }

@@ -19,7 +19,11 @@ class AdminUserSeeder extends Seeder
             throw new RuntimeException('Set a valid HIVE_ADMIN_EMAIL before running the admin seeder.');
         }
 
-        if (User::query()->where('email', $email)->exists()) {
+        $admin = User::query()->where('email', $email)->first();
+
+        if ($admin !== null) {
+            $admin->forceFill(['role' => User::ROLE_ADMIN])->save();
+
             return;
         }
 
@@ -34,6 +38,7 @@ class AdminUserSeeder extends Seeder
             'email' => $email,
             'password' => $password,
             'email_verified_at' => now(),
+            'role' => User::ROLE_ADMIN,
         ]);
     }
 }

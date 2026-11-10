@@ -14,6 +14,7 @@ export default defineConfig({
                 'resources/css/settings.css',
                 'resources/css/errors.css',
                 'resources/js/applications.js',
+                'resources/js/users.js',
             ],
             refresh: true,
             fonts: [

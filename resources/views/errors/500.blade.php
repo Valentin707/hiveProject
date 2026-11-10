@@ -1,6 +1,3 @@
-<div>
-    <!-- Simplicity is an acquired taste. - Katharine Gerould -->
-</div>
 @include('errors.layout', [
     'code' => '500',
     'title' => 'Core interruption',

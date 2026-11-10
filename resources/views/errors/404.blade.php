@@ -1,6 +1,3 @@
-<div>
-    <!-- Because you are alive, everything is possible. - Thich Nhat Hanh -->
-</div>
 @include('errors.layout', [
     'code' => '404',
     'title' => 'Signal not found',

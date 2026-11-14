@@ -15,6 +15,7 @@ export default defineConfig({
                 'resources/css/errors.css',
                 'resources/js/applications.js',
                 'resources/js/users.js',
+                'resources/css/oauth-authorize.css',
             ],
             refresh: true,
             fonts: [

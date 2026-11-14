@@ -1,0 +1,58 @@
+:root {
+    color-scheme: dark;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    color: #e7ebee;
+    background: #0a0a0c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 26px 18px;
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(ellipse at 50% -20%, rgba(71, 82, 94, 0.25), transparent 58%),
+        linear-gradient(rgba(157, 179, 196, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(157, 179, 196, 0.035) 1px, transparent 1px),
+        #0a0a0c;
+    background-size: auto, 52px 52px, 52px 52px, auto;
+}
+
+.authorize-shell { width: min(100%, 560px); }
+.authorize-panel { overflow: hidden; border: 1px solid rgba(173, 193, 207, 0.18); background: linear-gradient(145deg, rgba(23, 26, 31, 0.96), rgba(13, 15, 18, 0.98)); box-shadow: 0 22px 64px rgba(0, 0, 0, 0.32), inset 0 1px rgba(255, 255, 255, 0.025); }
+.authorize-header { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 24px; border-bottom: 1px solid rgba(173, 193, 207, 0.12); }
+.eyebrow { margin: 0; color: #bc7783; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; }
+.request-status { display: inline-flex; align-items: center; gap: 8px; color: #9aa4ac; font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase; }
+.request-status span { width: 6px; height: 6px; border-radius: 50%; background: #74ad92; box-shadow: 0 0 8px rgba(116, 173, 146, 0.65); }
+.authorize-content { padding: clamp(24px, 6vw, 38px); }
+.panel-index { margin: 0 0 10px; color: #9c626d; font-size: 8px; letter-spacing: 0.16em; }
+h1 { margin: 0; font-size: clamp(23px, 5vw, 30px); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; }
+.intro { margin: 14px 0 23px; color: #858b93; font-size: 11px; line-height: 1.75; }
+.intro strong { color: #e7ebee; font-weight: 500; }
+.scope-panel { margin: 0 0 19px; padding: 15px 17px; border: 1px solid rgba(173, 193, 207, 0.13); background: rgba(7, 9, 11, 0.42); }
+.scope-panel h2 { margin: 0 0 10px; color: #9ea5ad; font-size: 8px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase; }
+.scope-panel ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.scope-panel li, .scope-empty { color: #b8c0c6; font-size: 10px; line-height: 1.6; }
+.scope-panel li::before { margin-right: 8px; color: #bc7783; content: "//"; }
+.operator-card { display: grid; gap: 6px; margin-bottom: 24px; padding: 13px 15px; border-left: 2px solid rgba(188, 119, 131, 0.65); background: rgba(173, 193, 207, 0.045); }
+.operator-label { color: #777e87; font-size: 7px; letter-spacing: 0.15em; }
+.operator-name { color: #e4e9ec; font-size: 11px; }
+.operator-email { color: #9299a1; font-size: 9px; }
+.authorization-actions { display: flex; justify-content: flex-end; gap: 9px; }
+.authorization-actions form { margin: 0; }
+.approve-action, .deny-action { min-height: 40px; padding: 0 15px; border: 1px solid; font: 500 8px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace; letter-spacing: 0.11em; text-transform: uppercase; cursor: pointer; transition: border-color 150ms ease, color 150ms ease, background 150ms ease; }
+.approve-action { border-color: rgba(195, 122, 135, 0.54); color: #f0dadd; background: rgba(103, 50, 62, 0.24); }
+.approve-action:hover, .approve-action:focus-visible { border-color: #df9aa5; outline: none; color: #fff; background: rgba(130, 58, 72, 0.42); }
+.deny-action { border-color: rgba(173, 193, 207, 0.22); color: #aab2b9; background: rgba(7, 9, 11, 0.45); }
+.deny-action:hover, .deny-action:focus-visible { border-color: rgba(173, 193, 207, 0.48); outline: none; color: #fff; }
+.authorize-footer { padding: 13px 24px; border-top: 1px solid rgba(173, 193, 207, 0.1); color: #626a72; font-size: 8px; letter-spacing: 0.08em; text-align: center; }
+
+@media (max-width: 480px) {
+    .authorize-header { padding-right: 16px; padding-left: 16px; }
+    .request-status { font-size: 7px; }
+    .authorization-actions { flex-direction: column-reverse; }
+    .authorization-actions form, .approve-action, .deny-action { width: 100%; }
+}

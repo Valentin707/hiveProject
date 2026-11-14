@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\Passport\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,8 +16,11 @@ class ApplicationController extends Controller
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
+        $oauthClients = Client::query()
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        return view('applications.index', compact('applications'));
+        return view('applications.index', compact('applications', 'oauthClients'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -64,6 +68,7 @@ class ApplicationController extends Controller
             'description' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'is_active' => ['required', 'boolean'],
+            'oauth_client_id' => ['nullable', 'string', 'exists:oauth_clients,id'],
         ];
     }
 }

@@ -51,6 +51,19 @@
                     @error('url') <span class="field-error">{{ $message }}</span> @enderror
                 </div>
 
+                <div class="field">
+                    <label for="oauth_client_id">Passport OAuth client <span>optional</span></label>
+                    <select id="oauth_client_id" name="oauth_client_id">
+                        <option value="">No linked OAuth client</option>
+                        @foreach ($oauthClients as $oauthClient)
+                            <option value="{{ $oauthClient->getKey() }}" @selected(old('oauth_client_id') === (string) $oauthClient->getKey())>
+                                {{ $oauthClient->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('oauth_client_id') <span class="field-error">{{ $message }}</span> @enderror
+                </div>
+
                 <div class="field field-description">
                     <label for="description">HUD subtitle <span>optional</span></label>
                     <input id="description" name="description" type="text" value="{{ old('description') }}" maxlength="255" placeholder="Task orchestration">
@@ -94,6 +107,7 @@
                             <tr>
                                 <th scope="col">Name</th>
                                 <th scope="col">Endpoint</th>
+                                <th scope="col">Passport OAuth client</th>
                                 <th scope="col">HUD subtitle</th>
                                 <th scope="col">Order</th>
                                 <th scope="col">Status</th>
@@ -112,6 +126,16 @@
                                         <input class="table-input name-input" form="{{ $updateFormId }}" name="name" type="text" value="{{ $application->name }}" aria-label="Name for {{ $application->name }}" maxlength="255" required>
                                     </td>
                                     <td><input class="table-input url-input" form="{{ $updateFormId }}" name="url" type="url" value="{{ $application->url }}" aria-label="URL for {{ $application->name }}" maxlength="255" required></td>
+                                    <td>
+                                        <select class="table-input oauth-client-input" form="{{ $updateFormId }}" name="oauth_client_id" aria-label="Passport OAuth client for {{ $application->name }}">
+                                            <option value="">No linked OAuth client</option>
+                                            @foreach ($oauthClients as $oauthClient)
+                                                <option value="{{ $oauthClient->getKey() }}" @selected($application->oauth_client_id === (string) $oauthClient->getKey())>
+                                                    {{ $oauthClient->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
                                     <td><input class="table-input description-input" form="{{ $updateFormId }}" name="description" type="text" value="{{ $application->description }}" aria-label="HUD subtitle for {{ $application->name }}" maxlength="255"></td>
                                     <td><input class="table-input order-input" form="{{ $updateFormId }}" name="sort_order" type="number" value="{{ $application->sort_order }}" aria-label="Sort order for {{ $application->name }}" min="0" step="1" required></td>
                                     <td>

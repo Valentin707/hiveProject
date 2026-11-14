@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\Contracts\OAuthenticatable;
@@ -40,5 +41,26 @@ class User extends Authenticatable implements OAuthenticatable
             'two_factor_confirmed_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the applications this user can access.
+     *
+     * @return BelongsToMany<Application, $this>
+     */
+    public function applications(): BelongsToMany
+    {
+        return $this->belongsToMany(Application::class);
+    }
+
+    public function canAccessApplication(Application $application): bool
+    {
+        if ($this->role === self::ROLE_ADMIN) {
+            return true;
+        }
+
+        return $this->applications()
+            ->where('applications.id', $application->getKey())
+            ->exists();
     }
 }

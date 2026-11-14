@@ -96,6 +96,14 @@ h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-t
 .field input:focus, .field select:focus { border-color: rgba(207, 135, 148, 0.75); box-shadow: 0 0 0 1px rgba(207, 135, 148, 0.16); }
 .field select { appearance: none; }
 .field-error { display: block; margin-top: 6px; color: #e895a0; font-size: 9px; line-height: 1.4; }
+.clearance-field { grid-column: 1 / -1; margin: 0; padding: 0; border: 0; }
+.clearance-field legend { margin: 0 0 10px; padding: 0; color: #9ea5ad; font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; }
+.clearance-field legend span { margin-left: 5px; color: #696f76; }
+.clearance-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; border: 0; }
+.clearance-option { display: inline-flex !important; min-height: 34px; align-items: center; gap: 8px; margin: 0 !important; padding: 0 10px; border: 1px solid rgba(173, 193, 207, 0.16); color: #b8c0c6 !important; background: rgba(7, 9, 11, 0.48); font-size: 8px !important; letter-spacing: 0.04em !important; text-transform: none !important; cursor: pointer; }
+.clearance-option input { width: 13px !important; min-height: 13px !important; margin: 0; padding: 0; accent-color: #bd7582; }
+.clearance-option small { color: #858c94; font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; }
+.clearance-empty { margin: 0; color: #858c94; font-size: 9px; line-height: 1.6; }
 
 .primary-action, .role-action, .delete-action {
     min-height: 36px;
@@ -133,9 +141,22 @@ h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-t
 .role-badge.operator { border-color: rgba(173, 193, 207, 0.2); color: #a9b6bf; background: rgba(74, 87, 98, 0.12); }
 .role-light { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 7px currentColor; }
 .created-date { color: #9299a1 !important; white-space: nowrap; }
+.clearance-cell { min-width: 230px; }
+.clearance-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.clearance-badge { display: inline-flex; align-items: center; padding: 6px 8px; border: 1px solid rgba(173, 193, 207, 0.2); color: #acb8c0; background: rgba(74, 87, 98, 0.12); font-size: 7px; letter-spacing: 0.07em; line-height: 1.2; text-transform: uppercase; }
+.clearance-badge.inactive { border-style: dashed; color: #7f858c; }
+.clearance-badge.no-clearance { border-color: rgba(173, 193, 207, 0.13); color: #777e87; }
+.clearance-badge.admin-clearance { border-color: rgba(193, 111, 125, 0.36); color: #e0a1ab; background: rgba(103, 50, 62, 0.14); }
+.clearance-editor { margin-top: 9px; }
+.clearance-editor summary { width: fit-content; color: #c7a0a6; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.clearance-editor form { margin-top: 9px; padding: 10px; border: 1px solid rgba(173, 193, 207, 0.12); background: rgba(7, 9, 11, 0.38); }
+.editor-options { gap: 6px; margin-bottom: 9px; }
+.editor-options .clearance-option { min-height: 29px; padding: 0 7px; font-size: 7px !important; }
 .row-actions { display: flex; justify-content: flex-end; align-items: center; gap: 7px; }
 .row-actions form { margin: 0; }
-.role-action, .delete-action { min-height: 29px; padding: 0 8px; }
+.role-action, .delete-action, .clearance-save { min-height: 29px; padding: 0 8px; }
+.clearance-save { border: 1px solid rgba(195, 122, 135, 0.45); color: #f0dadd; background: rgba(103, 50, 62, 0.2); font: 500 8px/1 "SFMono-Regular", Consolas, "Liberation Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+.clearance-save:hover, .clearance-save:focus-visible { border-color: #df9aa5; outline: none; color: #fff; background: rgba(130, 58, 72, 0.38); }
 .delete-action { border-color: rgba(193, 111, 125, 0.32); color: #cc8792; }
 .delete-action:hover, .delete-action:focus-visible { border-color: #e38f9c; outline: none; color: #fff; background: rgba(119, 50, 63, 0.22); }
 .protected-label { color: #666d75; font-size: 7px; letter-spacing: 0.1em; white-space: nowrap; }
@@ -147,7 +168,7 @@ h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-t
     .users-heading { display: block; }
     .heading-actions { align-items: center; flex-direction: row; justify-content: space-between; margin-top: 16px; }
     .panel-hint { display: none; }
-    .users-table { min-width: 780px; }
+    .users-table { min-width: 1000px; }
     .modal-heading { padding: 21px 20px 17px; }
     .create-form { padding: 20px; }
 }

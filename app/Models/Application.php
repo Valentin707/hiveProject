@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['name', 'url', 'description', 'sort_order', 'is_active'])]
+#[Fillable(['name', 'url', 'description', 'sort_order', 'is_active', 'oauth_client_id'])]
 class Application extends Model
 {
     /** @use HasFactory<ApplicationFactory> */
@@ -29,5 +30,15 @@ class Application extends Model
             'sort_order' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the users who have clearance for this application.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
     }
 }

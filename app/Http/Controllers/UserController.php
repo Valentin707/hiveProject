@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Application;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,11 +16,17 @@ class UserController extends Controller
     public function index(): View
     {
         $users = User::query()
+            ->with('applications')
             ->orderByDesc('created_at')
             ->orderBy('name')
             ->get();
+        $applications = Application::query()
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+        $activeApplications = $applications->where('is_active', true)->values();
 
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'applications', 'activeApplications'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,16 +36,33 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'string', 'confirmed', Password::min(12)],
             'role' => ['required', 'string', Rule::in([User::ROLE_ADMIN, User::ROLE_OPERATOR])],
+            'application_ids' => ['sometimes', 'array'],
+            'application_ids.*' => ['string', Rule::exists('applications', 'id')->where('is_active', true)],
         ]);
 
-        User::query()->create([
+        $user = User::query()->create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
         ]);
+        $user->applications()->sync($validated['application_ids'] ?? []);
 
         return to_route('users.index')->with('status', 'Operator account created.');
+    }
+
+    public function updateApplications(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->role === User::ROLE_OPERATOR, 403);
+
+        $validated = $request->validate([
+            'application_ids' => ['sometimes', 'array'],
+            'application_ids.*' => ['string', 'exists:applications,id'],
+        ]);
+
+        $user->applications()->sync($validated['application_ids'] ?? []);
+
+        return to_route('users.index')->with('status', 'Operator node clearance updated.');
     }
 
     public function updateRole(Request $request, User $user): RedirectResponse

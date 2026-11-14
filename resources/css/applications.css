@@ -58,11 +58,11 @@ h1 { margin: 0; font-size: clamp(25px, 4vw, 36px); font-weight: 400; letter-spac
 h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
 .panel-hint { padding-top: 3px; }
 
-.create-form { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.3fr) minmax(180px, 1fr) 100px auto auto; align-items: end; gap: 13px; }
+.create-form { display: grid; grid-template-columns: minmax(160px, 1fr) minmax(210px, 1.2fr) minmax(180px, 1fr) minmax(170px, 1fr) 90px minmax(170px, 1fr) auto; align-items: end; gap: 13px; }
 .field { min-width: 0; }
 .field label { display: block; margin: 0 0 8px; color: #9ea5ad; font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; }
 .field label span { color: #696f76; }
-.field input[type="text"], .field input[type="url"], .field input[type="number"] {
+.field input[type="text"], .field input[type="url"], .field input[type="number"], .field select {
     width: 100%;
     min-height: 41px;
     padding: 0 11px;
@@ -75,7 +75,8 @@ h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-t
     font-size: 10px;
 }
 
-.field input:focus, .table-input:focus { border-color: rgba(207, 135, 148, 0.75); box-shadow: 0 0 0 1px rgba(207, 135, 148, 0.16); }
+.field input:focus, .field select:focus, .table-input:focus { border-color: rgba(207, 135, 148, 0.75); box-shadow: 0 0 0 1px rgba(207, 135, 148, 0.16); }
+.field select { appearance: none; }
 .field-active { padding-bottom: 3px; }
 .checkbox-label { display: flex !important; min-height: 41px; align-items: center; gap: 9px; margin: 0 !important; color: #bac1c7 !important; letter-spacing: 0.04em !important; white-space: nowrap; }
 .checkbox-label input { accent-color: #bd7582; }
@@ -99,7 +100,7 @@ h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-t
 .primary-action { min-height: 41px; }
 
 .table-scroll { overflow-x: auto; }
-.applications-table { width: 100%; border-collapse: collapse; text-align: left; }
+.applications-table { width: 100%; min-width: 1150px; border-collapse: collapse; text-align: left; }
 .applications-table th { padding: 0 10px 12px; color: #777e87; font-size: 8px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; }
 .applications-table td { padding: 11px 10px; border-top: 1px solid rgba(173, 193, 207, 0.11); vertical-align: middle; }
 .applications-table th:first-child, .applications-table td:first-child { padding-left: 0; }
@@ -108,6 +109,7 @@ h2 { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0.1em; text-t
 .name-input { min-width: 115px; width: 135px; }
 .url-input { min-width: 180px; width: 100%; }
 .description-input { min-width: 120px; width: 100%; }
+.oauth-client-input { min-width: 190px; width: 100%; }
 .order-input { width: 66px; }
 .status-badge { min-height: 27px; padding: 0 8px; }
 .status-badge.active { border-color: rgba(116, 173, 146, 0.4); color: #b8dec9; background: rgba(51, 95, 72, 0.14); }

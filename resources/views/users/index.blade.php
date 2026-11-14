@@ -33,7 +33,7 @@
             <div class="notice error" role="alert">{{ $errors->first() }}</div>
         @endif
 
-        <dialog class="user-modal" id="create-user-modal" data-user-modal data-open-on-load="{{ $errors->hasAny(['name', 'email', 'password', 'password_confirmation', 'role']) ? 'true' : 'false' }}" aria-labelledby="create-heading">
+        <dialog class="user-modal" id="create-user-modal" data-user-modal data-open-on-load="{{ $errors->hasAny(['name', 'email', 'password', 'password_confirmation', 'role', 'application_ids', 'application_ids.*']) ? 'true' : 'false' }}" aria-labelledby="create-heading">
             <div class="modal-panel">
                 <header class="modal-heading">
                     <div>
@@ -79,6 +79,30 @@
                         @error('role') <span class="field-error">{{ $message }}</span> @enderror
                     </div>
 
+                    <fieldset class="field clearance-field">
+                        <legend>Initial node clearance <span>active applications</span></legend>
+                        @if ($activeApplications->isEmpty())
+                            <p class="clearance-empty">No active applications are available for assignment.</p>
+                        @else
+                            <div class="clearance-options">
+                                @foreach ($activeApplications as $application)
+                                    <label class="clearance-option" for="create-application-{{ $application->id }}">
+                                        <input
+                                            id="create-application-{{ $application->id }}"
+                                            name="application_ids[]"
+                                            type="checkbox"
+                                            value="{{ $application->id }}"
+                                            @checked(in_array((string) $application->id, array_map('strval', (array) old('application_ids', [])), true))
+                                        >
+                                        <span>{{ $application->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @endif
+                        @error('application_ids') <span class="field-error">{{ $message }}</span> @enderror
+                        @error('application_ids.*') <span class="field-error">{{ $message }}</span> @enderror
+                    </fieldset>
+
                     <footer class="modal-actions">
                         <button class="secondary-action" type="button" data-close-user-modal>Cancel</button>
                         <button class="primary-action" type="submit">Create user</button>
@@ -106,6 +130,7 @@
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Access role</th>
+                                <th scope="col">Node clearance</th>
                                 <th scope="col">Created</th>
                                 <th scope="col"><span class="visually-hidden">Actions</span></th>
                             </tr>
@@ -125,6 +150,50 @@
                                             <span class="role-light" aria-hidden="true"></span>
                                             {{ $user->role === 'admin' ? 'Admin' : 'Operator' }}
                                         </span>
+                                    </td>
+                                    <td class="clearance-cell">
+                                        @if ($user->role === 'admin')
+                                            <span class="clearance-badge admin-clearance">FULL CLEARANCE (ADMIN)</span>
+                                        @else
+                                            <div class="clearance-badges">
+                                                @forelse ($user->applications as $application)
+                                                    <span class="clearance-badge {{ $application->is_active ? 'active' : 'inactive' }}">
+                                                        {{ $application->name }}
+                                                    </span>
+                                                @empty
+                                                    <span class="clearance-badge no-clearance">NO NODE CLEARANCE</span>
+                                                @endforelse
+                                            </div>
+
+                                            <details class="clearance-editor">
+                                                <summary>Manage node access</summary>
+                                                <form method="POST" action="{{ route('users.applications.update', $user) }}">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <fieldset class="clearance-options editor-options">
+                                                        <legend class="visually-hidden">Applications assigned to {{ $user->name }}</legend>
+                                                        @forelse ($applications as $application)
+                                                            <label class="clearance-option" for="user-{{ $user->id }}-application-{{ $application->id }}">
+                                                                <input
+                                                                    id="user-{{ $user->id }}-application-{{ $application->id }}"
+                                                                    name="application_ids[]"
+                                                                    type="checkbox"
+                                                                    value="{{ $application->id }}"
+                                                                    @checked($user->applications->contains('id', $application->id))
+                                                                >
+                                                                <span>{{ $application->name }}</span>
+                                                                @unless ($application->is_active)
+                                                                    <small>Inactive</small>
+                                                                @endunless
+                                                            </label>
+                                                        @empty
+                                                            <p class="clearance-empty">No applications are registered.</p>
+                                                        @endforelse
+                                                    </fieldset>
+                                                    <button class="clearance-save" type="submit">Save clearance</button>
+                                                </form>
+                                            </details>
+                                        @endif
                                     </td>
                                     <td class="created-date">{{ $user->created_at?->format('Y-m-d H:i') ?? 'Unknown' }}</td>
                                     <td class="row-actions">

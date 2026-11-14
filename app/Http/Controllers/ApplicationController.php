@@ -65,6 +65,7 @@ class ApplicationController extends Controller
         return [
             'name' => ['required', 'string', 'max:255'],
             'url' => ['required', 'url:http,https', 'max:255'],
+            'health_check_url' => ['nullable', 'url:http,https', 'max:255'],
             'description' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['required', 'integer', 'min:0'],
             'is_active' => ['required', 'boolean'],

@@ -51,6 +51,12 @@
                     @error('url') <span class="field-error">{{ $message }}</span> @enderror
                 </div>
 
+                <div class="field field-health-url">
+                    <label for="health_check_url">Health check URL <span>optional</span></label>
+                    <input id="health_check_url" name="health_check_url" type="url" value="{{ old('health_check_url') }}" placeholder="https://tasks.hive.test/up" maxlength="255">
+                    @error('health_check_url') <span class="field-error">{{ $message }}</span> @enderror
+                </div>
+
                 <div class="field">
                     <label for="oauth_client_id">Passport OAuth client <span>optional</span></label>
                     <select id="oauth_client_id" name="oauth_client_id">
@@ -95,7 +101,7 @@
                     <span class="panel-index">02 // CONNECTED SERVICES</span>
                     <h2 id="nodes-heading">Registered Applications</h2>
                 </div>
-                <span class="panel-hint">EDIT FIELDS INLINE</span>
+                <span class="panel-hint">NODE INVENTORY</span>
             </div>
 
             @if ($applications->isEmpty())
@@ -105,39 +111,24 @@
                     <table class="applications-table">
                         <thead>
                             <tr>
-                                <th scope="col">Name</th>
+                                <th scope="col">Node</th>
                                 <th scope="col">Endpoint</th>
-                                <th scope="col">Passport OAuth client</th>
-                                <th scope="col">HUD subtitle</th>
-                                <th scope="col">Order</th>
+                                <th scope="col">OAuth client</th>
                                 <th scope="col">Status</th>
-                                <th scope="col"><span class="visually-hidden">Actions</span></th>
+                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($applications as $application)
-                                @php($updateFormId = 'update-application-'.$application->id)
+                                @php($oauthClientName = $oauthClients->firstWhere('id', $application->oauth_client_id)?->name)
                                 <tr>
-                                    <td>
-                                        <form id="{{ $updateFormId }}" method="POST" action="{{ route('applications.update', $application) }}">
-                                            @csrf
-                                            @method('PUT')
-                                        </form>
-                                        <input class="table-input name-input" form="{{ $updateFormId }}" name="name" type="text" value="{{ $application->name }}" aria-label="Name for {{ $application->name }}" maxlength="255" required>
+                                    <td class="node-cell">
+                                        <strong>{{ $application->name }}</strong>
+                                        <span>{{ $application->description ?: 'No HUD subtitle' }}</span>
+                                        <small>ORDER {{ str_pad((string) $application->sort_order, 2, '0', STR_PAD_LEFT) }}</small>
                                     </td>
-                                    <td><input class="table-input url-input" form="{{ $updateFormId }}" name="url" type="url" value="{{ $application->url }}" aria-label="URL for {{ $application->name }}" maxlength="255" required></td>
-                                    <td>
-                                        <select class="table-input oauth-client-input" form="{{ $updateFormId }}" name="oauth_client_id" aria-label="Passport OAuth client for {{ $application->name }}">
-                                            <option value="">No linked OAuth client</option>
-                                            @foreach ($oauthClients as $oauthClient)
-                                                <option value="{{ $oauthClient->getKey() }}" @selected($application->oauth_client_id === (string) $oauthClient->getKey())>
-                                                    {{ $oauthClient->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td><input class="table-input description-input" form="{{ $updateFormId }}" name="description" type="text" value="{{ $application->description }}" aria-label="HUD subtitle for {{ $application->name }}" maxlength="255"></td>
-                                    <td><input class="table-input order-input" form="{{ $updateFormId }}" name="sort_order" type="number" value="{{ $application->sort_order }}" aria-label="Sort order for {{ $application->name }}" min="0" step="1" required></td>
+                                    <td class="endpoint-cell">{{ $application->url }}</td>
+                                    <td class="oauth-cell">{{ $oauthClientName ?: 'UNLINKED' }}</td>
                                     <td>
                                         <form method="POST" action="{{ route('applications.toggle', $application) }}">
                                             @csrf
@@ -146,11 +137,9 @@
                                                 {{ $application->is_active ? 'Active' : 'Inactive' }}
                                             </button>
                                         </form>
-                                        <input form="{{ $updateFormId }}" type="hidden" name="is_active" value="0">
-                                        <input class="visually-hidden" form="{{ $updateFormId }}" type="checkbox" name="is_active" value="1" @checked($application->is_active)>
                                     </td>
                                     <td class="row-actions">
-                                        <button class="save-action" type="submit" form="{{ $updateFormId }}">Save</button>
+                                        <button class="edit-action" type="button" data-open-application-modal="edit-application-{{ $application->id }}" aria-haspopup="dialog">Edit</button>
                                         <form method="POST" action="{{ route('applications.destroy', $application) }}" data-confirm-delete data-application-name="{{ $application->name }}">
                                             @csrf
                                             @method('DELETE')
@@ -162,6 +151,84 @@
                         </tbody>
                     </table>
                 </div>
+
+                @foreach ($applications as $application)
+                    @php($editingThisApplication = (string) old('edit_application_id') === (string) $application->id)
+                    <dialog class="edit-modal" id="edit-application-{{ $application->id }}" data-application-modal @if ($editingThisApplication) data-open-on-load="true" @endif>
+                        <section class="modal-panel" aria-labelledby="edit-heading-{{ $application->id }}">
+                            <header class="modal-heading">
+                                <div>
+                                    <span class="panel-index">NODE // CONFIGURATION</span>
+                                    <h2 id="edit-heading-{{ $application->id }}">Edit {{ $application->name }}</h2>
+                                </div>
+                                <button class="modal-close" type="button" data-close-application-modal aria-label="Close edit dialog">×</button>
+                            </header>
+
+                            <form class="edit-form" method="POST" action="{{ route('applications.update', $application) }}">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="edit_application_id" value="{{ $application->id }}">
+
+                                <div class="field">
+                                    <label for="edit-{{ $application->id }}-name">Application name</label>
+                                    <input id="edit-{{ $application->id }}-name" name="name" type="text" value="{{ $editingThisApplication ? old('name', $application->name) : $application->name }}" maxlength="255" required>
+                                    @if ($editingThisApplication) @error('name') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <div class="field">
+                                    <label for="edit-{{ $application->id }}-url">Application URL</label>
+                                    <input id="edit-{{ $application->id }}-url" name="url" type="url" value="{{ $editingThisApplication ? old('url', $application->url) : $application->url }}" maxlength="255" required>
+                                    @if ($editingThisApplication) @error('url') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <div class="field">
+                                    <label for="edit-{{ $application->id }}-health-url">Health check URL <span>optional</span></label>
+                                    <input id="edit-{{ $application->id }}-health-url" name="health_check_url" type="url" value="{{ $editingThisApplication ? old('health_check_url', $application->health_check_url) : $application->health_check_url }}" placeholder="Defaults to application URL" maxlength="255">
+                                    @if ($editingThisApplication) @error('health_check_url') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <div class="field">
+                                    <label for="edit-{{ $application->id }}-oauth-client">Passport OAuth client <span>optional</span></label>
+                                    <select id="edit-{{ $application->id }}-oauth-client" name="oauth_client_id">
+                                        <option value="">No linked OAuth client</option>
+                                        @foreach ($oauthClients as $oauthClient)
+                                            <option value="{{ $oauthClient->getKey() }}" @selected(($editingThisApplication ? old('oauth_client_id', $application->oauth_client_id) : $application->oauth_client_id) === (string) $oauthClient->getKey())>
+                                                {{ $oauthClient->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @if ($editingThisApplication) @error('oauth_client_id') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <div class="field">
+                                    <label for="edit-{{ $application->id }}-description">HUD subtitle <span>optional</span></label>
+                                    <input id="edit-{{ $application->id }}-description" name="description" type="text" value="{{ $editingThisApplication ? old('description', $application->description) : $application->description }}" maxlength="255">
+                                    @if ($editingThisApplication) @error('description') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <div class="field">
+                                    <label for="edit-{{ $application->id }}-sort-order">Sort order</label>
+                                    <input id="edit-{{ $application->id }}-sort-order" name="sort_order" type="number" value="{{ $editingThisApplication ? old('sort_order', $application->sort_order) : $application->sort_order }}" min="0" step="1" required>
+                                    @if ($editingThisApplication) @error('sort_order') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <div class="field field-active">
+                                    <label class="checkbox-label" for="edit-{{ $application->id }}-is-active">
+                                        <input type="hidden" name="is_active" value="0">
+                                        <input id="edit-{{ $application->id }}-is-active" name="is_active" type="checkbox" value="1" @checked($editingThisApplication ? old('is_active', $application->is_active) : $application->is_active)>
+                                        <span>Active on dashboard</span>
+                                    </label>
+                                    @if ($editingThisApplication) @error('is_active') <span class="field-error">{{ $message }}</span> @enderror @endif
+                                </div>
+
+                                <footer class="modal-actions">
+                                    <button class="secondary-action" type="button" data-close-application-modal>Cancel</button>
+                                    <button class="primary-action" type="submit">Save node</button>
+                                </footer>
+                            </form>
+                        </section>
+                    </dialog>
+                @endforeach
             @endif
         </section>
     </main>

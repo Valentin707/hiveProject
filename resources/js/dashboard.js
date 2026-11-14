@@ -1,7 +1,49 @@
 import '../css/dashboard.css';
 
 const dashboardCanvas = document.getElementById('dashboard-canvas');
-const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
+const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]').map((project) => ({
+    ...project,
+    status: 'probing',
+    latency: null
+}));
+
+async function refreshClusterHealth() {
+    try {
+        const response = await fetch(dashboardCanvas.dataset.healthUrl, {
+            cache: 'no-store',
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json' }
+        });
+
+        if (! response.ok) {
+            throw new Error('Cluster health request failed.');
+        }
+
+        const healthByApplication = await response.json();
+
+        for (const project of hiveProjects) {
+            const health = healthByApplication[project.id];
+
+            if (! health || ! ['online', 'offline'].includes(health.status)) {
+                project.status = 'offline';
+                project.latency = null;
+
+                continue;
+            }
+
+            project.status = health.status;
+            project.latency = Number.isFinite(health.latency_ms) ? health.latency_ms : null;
+        }
+    } catch {
+        for (const project of hiveProjects) {
+            project.status = 'offline';
+            project.latency = null;
+        }
+    }
+}
+
+void refreshClusterHealth();
+window.setInterval(() => void refreshClusterHealth(), 30_000);
 
 (() => {
     const COLORS = {
@@ -356,7 +398,13 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
 
                 this.ctx.save();
                 this.ctx.font = `500 ${fontSize}px "SFMono-Regular", Consolas, "Liberation Mono", monospace`;
-                const labelWidth = this.ctx.measureText(project.name).width;
+                const nameWidth = this.ctx.measureText(project.name).width;
+                const statusLabel = project.status === 'online'
+                    ? `ONLINE // ${project.latency ?? '--'}ms`
+                    : project.status === 'offline' ? 'OFFLINE' : 'SYNCING...';
+                this.ctx.font = `500 ${Math.max(8, fontSize * 0.58)}px "SFMono-Regular", Consolas, "Liberation Mono", monospace`;
+                const statusWidth = this.ctx.measureText(statusLabel).width;
+                const labelWidth = Math.max(nameWidth, statusWidth);
                 this.ctx.restore();
 
                 const placeLabelRight = labelOnRight
@@ -373,12 +421,13 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
                     fontSize,
                     labelX,
                     labelWidth,
+                    statusLabel,
                     align: placeLabelRight ? 'left' : 'right',
                     hitBox: {
                         left: placeLabelRight ? x - 7 : labelX - labelWidth - 4,
                         right: placeLabelRight ? labelX + labelWidth + 4 : x + 7,
                         top: y - fontSize * 0.8,
-                        bottom: y + fontSize * 0.8
+                        bottom: y + fontSize * 1.45
                     }
                 };
             });
@@ -394,29 +443,38 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
             this.updateProjectNodes(time);
 
             for (const node of this.projectNodes) {
+                const isOnline = node.status === 'online';
+                const isOffline = node.status === 'offline';
+                const tetherColor = isOnline
+                    ? 'rgba(16, 185, 129, 0.23)'
+                    : isOffline ? 'rgba(239, 68, 68, 0.09)' : 'rgba(156, 163, 175, 0.14)';
+
                 ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(centerX, centerY);
                 ctx.lineTo(node.x, node.y);
                 ctx.setLineDash([3, 8]);
-                ctx.lineDashOffset = -(time * 0.018 + node.index * 7);
-                ctx.strokeStyle = this.hoveredProject?.id === node.id
-                    ? 'rgba(185, 220, 239, 0.4)'
-                    : 'rgba(143, 170, 188, 0.17)';
-                ctx.lineWidth = 0.8;
+                ctx.lineDashOffset = isOnline ? -(time * 0.018 + node.index * 7) : 0;
+                ctx.strokeStyle = this.hoveredProject?.id === node.id && isOnline
+                    ? 'rgba(16, 185, 129, 0.56)'
+                    : tetherColor;
+                ctx.lineWidth = isOnline ? 1 : 0.8;
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                const progress = (time * 0.00012 + node.index / this.projectNodes.length) % 1;
-                const particleX = centerX + (node.x - centerX) * progress;
-                const particleY = centerY + (node.y - centerY) * progress;
-                const pulse = 1 + Math.sin(time * 0.004 + node.index) * 0.2;
-                ctx.beginPath();
-                ctx.arc(particleX, particleY, 1.6 * pulse, 0, TAU);
-                ctx.fillStyle = 'rgba(190, 228, 247, 0.88)';
-                ctx.shadowColor = 'rgba(139, 207, 239, 0.85)';
-                ctx.shadowBlur = 9;
-                ctx.fill();
+                if (isOnline) {
+                    const progress = (time * 0.00012 + node.index / this.projectNodes.length) % 1;
+                    const particleX = centerX + (node.x - centerX) * progress;
+                    const particleY = centerY + (node.y - centerY) * progress;
+                    const pulse = 1 + Math.sin(time * 0.004 + node.index) * 0.2;
+                    ctx.beginPath();
+                    ctx.arc(particleX, particleY, 1.6 * pulse, 0, TAU);
+                    ctx.fillStyle = '#10b981';
+                    ctx.shadowColor = 'rgba(16, 185, 129, 0.95)';
+                    ctx.shadowBlur = 9;
+                    ctx.fill();
+                }
+
                 ctx.restore();
             }
         }
@@ -425,30 +483,52 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
             const { ctx } = this;
             for (const node of this.projectNodes) {
                 const hovered = this.hoveredProject?.id === node.id;
-                const pulse = 1 + (Math.sin(time * 0.003 + node.index * 1.3) + 1) * 0.09;
+                const isOnline = node.status === 'online';
+                const isOffline = node.status === 'offline';
+                const coreColor = isOnline ? '#10b981' : isOffline ? '#ef4444' : '#9ca3af';
+                const glowColor = isOnline
+                    ? 'rgba(16, 185, 129, 0.95)'
+                    : isOffline ? 'rgba(239, 68, 68, 0.9)' : 'rgba(245, 158, 11, 0.78)';
+                const ringColor = isOnline
+                    ? 'rgba(16, 185, 129, 0.68)'
+                    : isOffline ? 'rgba(239, 68, 68, 0.56)' : 'rgba(156, 163, 175, 0.48)';
+                const hoveredRingColor = isOnline
+                    ? 'rgba(16, 185, 129, 0.9)'
+                    : isOffline ? 'rgba(239, 68, 68, 0.82)' : 'rgba(156, 163, 175, 0.76)';
+                const labelColor = isOnline
+                    ? 'rgba(52, 211, 153, 0.94)'
+                    : isOffline ? 'rgba(248, 113, 113, 0.9)' : 'rgba(245, 158, 11, 0.86)';
+                const pulseSpeed = isOffline ? 0.005 : 0.003;
+                const pulse = 1 + (Math.sin(time * pulseSpeed + node.index * 1.3) + 1) * (isOffline ? 0.16 : 0.09);
                 const dotRadius = (hovered ? 6.8 : 5) * pulse;
 
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, dotRadius + (hovered ? 5 : 3), 0, TAU);
-                ctx.strokeStyle = hovered ? 'rgba(213, 242, 255, 0.72)' : 'rgba(164, 221, 246, 0.5)';
+                ctx.strokeStyle = hovered ? hoveredRingColor : ringColor;
                 ctx.lineWidth = 1.25;
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, dotRadius, 0, TAU);
-                ctx.fillStyle = hovered ? '#ffffff' : '#d8f3ff';
-                ctx.shadowColor = hovered ? '#b8eaff' : 'rgba(139, 216, 246, 0.98)';
-                ctx.shadowBlur = hovered ? 19 : 14;
+                ctx.fillStyle = hovered ? '#ffffff' : coreColor;
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = hovered ? 19 : isOffline ? 16 : 14;
                 ctx.fill();
 
                 ctx.font = `500 ${node.fontSize}px "SFMono-Regular", Consolas, "Liberation Mono", monospace`;
                 ctx.textAlign = node.align;
                 ctx.textBaseline = 'middle';
                 ctx.fillStyle = hovered ? '#ffffff' : 'rgba(224, 235, 242, 0.88)';
-                ctx.shadowColor = hovered ? 'rgba(159, 218, 246, 0.85)' : 'rgba(96, 148, 174, 0.42)';
+                ctx.shadowColor = hovered ? glowColor : 'rgba(96, 148, 174, 0.42)';
                 ctx.shadowBlur = hovered ? 12 : 5;
                 ctx.fillText(node.name, node.labelX, node.y);
+
+                ctx.font = `500 ${Math.max(8, node.fontSize * 0.58)}px "SFMono-Regular", Consolas, "Liberation Mono", monospace`;
+                ctx.fillStyle = labelColor;
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = isOnline ? 5 : 3;
+                ctx.fillText(node.statusLabel, node.labelX, node.y + node.fontSize * 0.95, node.labelWidth + 8);
 
                 if (hovered && node.description) {
                     const subtitle = node.description.length > 42
@@ -458,7 +538,7 @@ const hiveProjects = JSON.parse(dashboardCanvas.dataset.applications || '[]');
                     ctx.font = `400 ${Math.max(9, node.fontSize * 0.66)}px "SFMono-Regular", Consolas, "Liberation Mono", monospace`;
                     ctx.fillStyle = 'rgba(194, 211, 221, 0.78)';
                     ctx.shadowBlur = 0;
-                    ctx.fillText(subtitle, node.labelX, node.y + node.fontSize * 0.92, 220);
+                    ctx.fillText(subtitle, node.labelX, node.y + node.fontSize * 1.72, 220);
                 }
 
                 ctx.restore();
